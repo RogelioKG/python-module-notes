@@ -21,25 +21,21 @@
       },
       "editor.defaultFormatter": "charliermarsh.ruff"
     },
-    "python.analysis.autoImportCompletions": false,
-    "python.analysis.typeCheckingMode": "strict"
+    "python.analysis.typeCheckingMode": "basic"
   }
   ```
 
 + `pyproject.toml`
   ```toml
-  [tool.ruff]
-  line-length = 100
-
   [tool.ruff.lint]
   select = [
-      "E",  # pycodestyle errors (與 PEP 8 標準不符的錯誤)
-      "W",  # pycodestyle warnings (與 PEP 8 標準不符的警告)
-      "F",  # pyflakes (檢查未使用的變數或模組等)
-      "I",  # isort (排序模組)
-      "C",  # flake8-comprehensions (簡潔表達式)
-      "B",  # flake8-bugbear (可揪出 mutable default arguments 等 BUG)
-      "UP",  # pyupgrade (舊語法升級)
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
   ]
 
   [tool.ruff.format]
@@ -52,7 +48,7 @@
 
   > `--fix` Linter 修正
 
-  ```
+  ```bash
   ruff check                          # Lint all files in the current directory (and any subdirectories).
   ruff check path/to/code/            # Lint all files in `/path/to/code` (and any subdirectories).
   ruff check path/to/code/*.py        # Lint all `.py` files in `/path/to/code`.
