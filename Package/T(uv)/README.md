@@ -122,6 +122,28 @@
     ```
     uv run --with httpx==0.27.0 main.py
     ```
+  + 在 Unix-like OS 下也可以搭配 shebang！
+    ```py
+    #!/usr/bin/env -S uv run --script
+    #
+    # /// script
+    # requires-python = ">=3.12"
+    # dependencies = [
+    #     "pyfiglet",
+    # ]
+    # ///
+
+    import pyfiglet
+    import sys
+
+    def generate_banner(text):
+        ascii_banner = pyfiglet.figlet_format(text)
+        print(ascii_banner)
+        print(f"--- Generated using Python {sys.version.split()[0]} via uv ---")
+
+    if __name__ == "__main__":
+        generate_banner("UV POWERED")
+    ```
 + #### `--app`
   > 用於構建一個<mark>應用程式</mark>，通常不作為套件發布
   + 目錄架構
