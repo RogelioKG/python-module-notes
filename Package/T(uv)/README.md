@@ -51,7 +51,7 @@
 ## Note
 |📘 <span class="note">NOTE</span> : uv|
 |:---|
-|筆者自 2024/12 入坑 uv，持續記錄 uv 的點點滴滴...<br><span style="color: grey;">上次更新時間：2026/02/05 (版本：0.10.0)</span>|
+|筆者自 2024/12 入坑 uv，持續記錄 uv 的點點滴滴...<br><span style="color: grey;">上次更新時間：2026/04/11 (版本：0.11.6)</span>|
 | uv 安裝套件方式：使用 hardlink (詳見：[cache](#cache：快取))|
 |uv 的 <mark>[build backend](https://hackmd.io/@RogelioKG/setuptools)：`uv-build`</mark> (打包成可發布套件的工具)|
 |uv 的 <mark>lockfile：`uv.lock`</mark> (紀錄每個套件的版本與它們的依賴關係) <br><span style="color: grey;">註：PEP 751 (2024/7/26) 終於正式要求了 Python 的標準 lockfile 為 `pylock.toml`。</span>|
@@ -288,6 +288,9 @@
   + 不會自動安裝、移除套件
 
 ### `run`：執行腳本
+|🚨 <span class="caution">CAUTION</span>|
+|:---|
+|當 <mark>`pyproject.toml` 和 `uv.lock` 不一致</mark> 時，<mark>進行同步</mark> (以 `pyproject.toml` 為準)。|
 + #### ` `
   > 一般執行
   ```
@@ -309,7 +312,7 @@
   |📗 <span class="tip">TIP</span>|
   |:---|
   |超好用：開發套件時，進行多版本測試|
-+ ### `--env-file`
++ #### `--env-file`
   > 暫時載入某個環境變數檔執行
   ```
   uv run --env-file .env main.py
@@ -317,6 +320,12 @@
   |📗 <span class="tip">TIP</span>|
   |:---|
   |超好用：可引入任意路徑的 `.env` |
++ #### `--frozen`
+  > 當 <mark>`pyproject.toml` 和 `uv.lock` 不一致</mark> 時，<mark>不進行同步</mark>。\
+  > (直接執行)
++ #### `--locked`
+  > 斷言 <mark>`pyproject.toml` 和 `uv.lock` 一致</mark>。\
+  > (確定一致後執行)
 
 ### `tree`：依賴樹
 > 展示套件們的依賴關係
@@ -357,18 +366,18 @@
   ```
   |🚨 <span class="caution">CAUTION</span>|
   |:---|
-  |當 `pyproject.toml` 和 `uv.lock` 不一致時，<br><mark>試圖同步</mark> (以 `pyproject.toml` 為準)，<br>再導出 `uv.lock` 的 lockfile 資訊。|
+  |當 <mark>`pyproject.toml` 和 `uv.lock` 不一致</mark> 時，<mark>進行同步</mark> (以 `pyproject.toml` 為準)。|
++ #### `--frozen`
+  > 當 <mark>`pyproject.toml` 和 `uv.lock` 不一致</mark> 時，<mark>不進行同步</mark>。\
+  > (直接根據 `uv.lock` 導出相關資訊)
++ #### `--locked`
+  > 斷言 <mark>`pyproject.toml` 和 `uv.lock` 一致</mark>。\
+  > (確定一致後，根據 `uv.lock` 導出相關資訊)
 + #### `--format`
   > 輸出格式
 + #### `--no-hashes`
   > 不希望導出內容有 hash 值。\
   > (hash 值確保你下載到的是原本的套件，能防止供應鏈攻擊、中間人攻擊)
-+ #### `--frozen`
-  > 當 `pyproject.toml` 和 `uv.lock` 不一致時，\
-  > <mark>不會試圖先同步</mark>，而是直接導出 `uv.lock` 的 lockfile 資訊。
-+ #### `--locked`
-  > 斷言 `uv.lock` 在導出過程中，不會被更改。\
-  > (即斷言 <mark>`pyproject.toml` 和 `uv.lock` 一致</mark>)
 + #### `--only-group`
   > 僅導出特定 group 內的依賴套件
 
@@ -495,7 +504,7 @@
   ```
 
 ### `lock`：生成 lockfile
-> ...
+> 根據 `pyproject.toml` 生成 lockfile
 
 
 ### `auth`：套件上傳、下載需授權
@@ -635,11 +644,12 @@ explicit = true
 ## Project Structures
 
 ### namespace package
-+ 有一種很特別的套件
++ 說明
+  + 有一種很特別的套件
   + install 時：`uv add google-auth google-cloud-storage`
   + import 時：`from google.auth import ...` `from google.cloud import ...` 
   + 嗯？我剛剛裝的是 `google-auth` 和 `google-cloud-storage` 對吧？怎麼都變 `google` 了？
-+ namespace package 的魅力
++ 魅力
   + 使用者所見目錄
     ```py
     site-packages/
@@ -648,7 +658,7 @@ explicit = true
         ├── auth/ # 子套件
         │   ├── __init__.py
         │   └── ...
-        ├── outh2/ # 子套件
+        ├── oauth2/ # 子套件
         │   ├── __init__.py
         │   └── ...
         └── cloud/ # 子套件
@@ -659,27 +669,30 @@ explicit = true
     ```py
     google-auth/ # 套件
     │
-    └── google/
-        └── auth/ # 子套件
-        │   ├── __init__.py
-        │   └── ...
-        └── outh2/
-            ├── __init__.py
-            └── ...
-
+    ├── google/
+    │   ├── auth/ # 子套件
+    │   │   ├── __init__.py
+    │   │   └── ...
+    │   └── oauth2/ # 子套件
+    │       ├── __init__.py
+    │       └── ...
+    └── pyproject.toml
+    ```
+    ```py
     google-cloud-storage/ # 套件
     │
-    └── google/
-        └── cloud/ # 子套件
-            ├── __init__.py
-            └── ...
+    ├── google/
+    │   └── cloud/ # 子套件
+    │       ├── __init__.py
+    │       └── ...
+    └── pyproject.toml
     ```
 + 優勢
   + 套件變成類似插件 (addons) 一樣
   + 根據需求下載需要的插件，每個插件裡包含不同功能的子套件
   + 插件本身也能依賴其他插件，這樣就能包成一個功能更強大的插件
   + 對於 developer 而言，每個插件可分配一個團隊開發
-  + 對於 user 而言，所有插件仍歸屬同一個 namespace (統一品牌體驗)
+  + 對於 user 而言，所有插件仍歸屬同一個 namespace，統一品牌體驗
 + 配置
   + `pyproject.toml` 
     ```toml
@@ -692,86 +705,298 @@ explicit = true
 
     [tool.uv.build-backend]
     module-name = "google" # 命名空間
-    module-root = "" # 根目錄 (預設是 "src")
+    module-root = "" # 命名空間所在目錄 (預設是 "src"，頂層目錄是 "")
     namespace = true # 使用 namespace package
     ```
   + 實際開發目錄
     ```py
     google-auth/ # 套件
     │
-    └── google/
-        └── auth/ # 子套件
-        │   ├── __init__.py
-        │   └── ...
-        └── outh2/
-            ├── __init__.py
-            └── ...
+    ├── google/
+    │   ├── auth/ # 子套件
+    │   │   ├── __init__.py
+    │   │   └── ...
+    │   └── oauth2/ # 子套件
+    │       ├── __init__.py
+    │       └── ...
+    └── pyproject.toml
     ```
 
 ### workspace
 + 參考
   + [**Using workspaces - uv**](https://docs.astral.sh/uv/concepts/projects/workspaces)
-  + [**是 Ray 不是 Array - Monorepo**](https://israynotarray.com/other/20240413/3177435894/)
-+ 簡單來說就是 <mark>monorepo</mark>
-  + <mark>每個小專案 (package) 都有自己的設定</mark>(`pyproject.toml`)
-  + 但由<mark>頂層專案 (workspace) 統一管理所有依賴</mark>(`uv.lock`)
++ 說明
+  + 由 workspace 統一管理所有 members 的依賴解析（用同個 `uv.lock`）、虛擬環境 (`.venv/` 在頂層)
+  + 但每個 member 都擁有自己的依賴（各自的 `pyproject.toml`）
 + 優勢
-  + 每個小專案都可以作為套件發布 (不像 monolith 是單純的模組)
-  + CI / CD 根據依賴 DAG 進行部分測試 (不像 monolith 改一行就要全部重測)
-+ 專案目錄
-  ```py
-  albatross # 頂層專案
-  ├── packages 
-  │   ├── bird-feeder # 小專案 1
-  │   │   ├── pyproject.toml
-  │   │   └── src
-  │   │       └── bird_feeder
-  │   │           ├── __init__.py
-  │   │           └── foo.py
-  │   └── seeds # 小專案 2
-  │       ├── pyproject.toml
-  │       └── src
-  │           └── seeds
-  │               ├── __init__.py
-  │               └── bar.py
-  ├── pyproject.toml
-  ├── README.md
-  ├── uv.lock
-  └── src
-      └── albatross
-          └── main.py
-  ```
-+ `pyproject.toml`
-  ```toml
-  [project]
-  name = "albatross"
-  version = "0.1.0"
-  requires-python = ">=3.13"
-  dependencies = [
-      "bird-feeder",
-      "seeds",
-  ]
+  + 全域一致依賴解析
+    + 在同一個 workspace 下，若不同 member 都安裝同名套件，解析結果必然收斂到同一個版本
+  + 內部套件協作成本低
+    + 在 workspace 下，member 可設定為直接互相依賴，不需先發版到 registry (PyPI)
+  + 漸進式架構演化友善
+    + 可從單一專案平滑演進為多 package monorepo，不需大幅重構工具鏈
++ 範例
+  + 附註
+    + 雖然官方文檔中選用 `--package` 架構作為範例，但 `--app` 等其他架構也能適用
+  + 目錄
+    ```
+    albatross
+    ├── packages
+    │   ├── bird-feeder
+    │   │   ├── pyproject.toml
+    │   │   └── src
+    │   │       └── bird_feeder
+    │   │           └── __init__.py
+    │   └── seeds
+    │       ├── pyproject.toml
+    │       └── src
+    │           └── seeds
+    │               └── __init__.py
+    ├── src
+    │   └── albatross
+    │       └── __init__.py
+    ├── pyproject.toml
+    └── uv.lock
+    ```
+  + 建立
+    ```
+    uv init albatross --package
+    uv init packages/bird-feeder --package
+    uv init packages/seeds --package
+    uv add --package seeds faker
+    uv add --package bird-feeder seeds
+    uv add --package bird-feeder pydantic
+    uv add --package albatross bird-feeder
+    uv add --package albatross rich
+    ```
+  + 依賴關係
+    ```
+    seeds v0.1.0
+    └── faker v40.13.0
+        └── tzdata v2026.1
+    bird-feeder v0.1.0
+    ├── pydantic v2.12.5
+    │   ├── annotated-types v0.7.0
+    │   ├── pydantic-core v2.41.5
+    │   │   └── typing-extensions v4.15.0
+    │   ├── typing-extensions v4.15.0
+    │   └── typing-inspection v0.4.2
+    │       └── typing-extensions v4.15.0
+    └── seeds v0.1.0 (*)
+    albatross v0.1.0
+    ├── bird-feeder v0.1.0 (*)
+    └── rich v14.3.4
+        ├── markdown-it-py v4.0.0
+        │   └── mdurl v0.1.2
+        └── pygments v2.20.0
+    ```
+  + 配置
+    + `./packages/seeds/pyproject.toml`
+      ```toml
+      [project]
+      name = "seeds"
+      version = "0.1.0"
+      description = "..."
+      readme = "README.md"
+      authors = [
+          { name = "RogelioKG", email = "???@gmail.com" }
+      ]
+      requires-python = ">=3.12.12"
+      dependencies = [
+          "faker>=37.1.0",
+      ]
 
-  [tool.uv.sources]
-  bird-feeder = { workspace = true }
-  seeds = { workspace = true }
+      [project.scripts]
+      seeds = "seeds:main"
 
-  [tool.uv.workspace]
-  members = ["packages/*"]
-  ```
-+ `bird-feeder/pyproject.toml`
-  ```toml
-  [project]
-  name = "bird-feeder"
-  version = "0.1.0"
-  description = "Add your description here"
-  requires-python = ">=3.13"
-  dependencies = ["httpx", "seeds"]
+      [build-system]
+      requires = ["uv_build>=0.11.6,<0.12.0"]
+      build-backend = "uv_build"
+      ```
+    + `./packages/bird-feeder/pyproject.toml`
+      ```toml
+      [project]
+      name = "bird-feeder"
+      version = "0.1.0"
+      description = "..."
+      readme = "README.md"
+      authors = [
+          { name = "RogelioKG", email = "???@gmail.com" }
+      ]
+      requires-python = ">=3.12.12"
+      dependencies = [
+          "seeds",
+          "pydantic>=2.11.0",
+      ]
 
-  [build-system]
-  requires = ["uv_build>=0.9.5,<0.10.0"]
-  build-backend = "uv_build"
-  ```
+      [project.scripts]
+      bird-feeder = "bird_feeder:main"
+
+      [build-system]
+      requires = ["uv_build>=0.11.6,<0.12.0"]
+      build-backend = "uv_build"
+
+      [tool.uv.sources]
+      # bird-feeder 若須安裝 seeds 套件，可直接從本地 workspace 安裝，無須透過 PyPI
+      seeds = { workspace = true }
+      ```
+    + `./pyproject.toml`
+      ```toml
+      [project]
+      name = "albatross"
+      version = "0.1.0"
+      description = "..."
+      readme = "README.md"
+      authors = [{ name = "RogelioKG", email = "???@gmail.com" }]
+      requires-python = ">=3.12.12"
+      dependencies = [
+          "bird-feeder",
+          "rich>=14.0.0",
+      ]
+
+      [project.scripts]
+      albatross = "albatross:main"
+
+      [build-system]
+      requires = ["uv_build>=0.11.6,<0.12.0"]
+      build-backend = "uv_build"
+
+      [tool.uv.sources]
+      # albatross 若須安裝 bird-feeder 套件，可直接從本地 workspace 安裝，無須透過 PyPI
+      bird-feeder = { workspace = true }
+
+      [tool.uv.workspace]
+      # 這目錄底下皆列入 member (註：albatross 本身也是 member)
+      members = ["packages/*"]
+      ```
+  + 腳本
+    + `./packages/seeds/src/seeds/__init__.py`
+      ```py
+      from random import choice
+      from faker import Faker
+
+      faker = Faker("en_US")
+      seed_types = ["sunflower", "chia", "pumpkin", "flax"]
+
+      def get_seed_payload() -> dict[str, str]:
+          return {
+              "batch_id": faker.bothify(text="SEED-####"),
+              "seed_type": choice(seed_types),
+              "origin": faker.country(),
+          }
+
+      def main() -> None:
+          payload = get_seed_payload()
+          print(f"[seeds] {payload['batch_id']} -> {payload['seed_type']} from {payload['origin']}")
+      ```
+    + `./packages/bird-feeder/src/bird_feeder/__init__.py`
+      ```py
+      from pydantic import BaseModel, Field
+      from seeds import get_seed_payload
+
+      class FeedingTicket(BaseModel):
+          bird: str = Field(min_length=3)
+          seed_type: str
+          batch_id: str
+          origin: str
+          grams: int = Field(ge=10, le=120)
+
+      def feed_bird(bird: str = "albatross") -> FeedingTicket:
+          payload = get_seed_payload()
+          grams = 70 if payload["seed_type"] in {"sunflower", "pumpkin"} else 50
+          return FeedingTicket(
+              bird=bird,
+              seed_type=payload["seed_type"],
+              batch_id=payload["batch_id"],
+              origin=payload["origin"],
+              grams=grams,
+          )
+
+      def main() -> None:
+          print("[bird-feeder]")
+          print(feed_bird().model_dump_json(indent=2))
+      ```
+    + `./src/albatross/__init__.py`
+      ```py
+      from bird_feeder import feed_bird
+      from rich.console import Console
+      from rich.table import Table
+
+      def main() -> None:
+          ticket = feed_bird("wandering albatross")
+
+          table = Table(title="Albatross Feeding Report")
+          table.add_column("Field")
+          table.add_column("Value")
+          table.add_row("Bird", ticket.bird)
+          table.add_row("Seed", ticket.seed_type)
+          table.add_row("Batch", ticket.batch_id)
+          table.add_row("Origin", ticket.origin)
+          table.add_row("Grams", str(ticket.grams))
+
+          console = Console()
+          console.print(table)
+      ```
+  + 操作
+    + 管理依賴
+      + 對 albatross 新增依賴
+        ```
+        uv add --package albatross rich
+        ```
+      + 對 bird-feeder 新增依賴
+        ```
+        uv add --package bird-feeder pydantic
+        ```
+      + 對 seeds 新增依賴
+        ```
+        uv add --package seeds faker
+        ```
+    + 同步環境
+      + 將依賴同步成 albatross 的形狀 (root package)
+        ```
+        uv sync
+        ```
+      + 將依賴同步成 bird-feeder 的形狀
+        ```
+        uv sync --package bird-feeder
+        ```
+      + 將依賴同步成 seeds 的形狀
+        ```
+        uv sync --package seeds
+        ```
+      + 將依賴同步成所有 members 的形狀 (albatross, bird-feeder, seeds)
+        ```
+        uv sync --all-packages
+        ```
+    + 運行腳本
+      + 在 albatross 的依賴下運行
+        ```
+        uv run albatross
+        ```
+      + 在 bird-feeder 的依賴下運行
+        ```
+        uv run --package bird-feeder bird-feeder
+        ```
+      + 在 seeds 的依賴下運行
+        ```
+        uv run --package seeds seeds
+        ```
++ 注意
+  + uv 能管「安裝了哪些依賴」，但很難在 Python runtime 層面強制「你只能 import 自己宣告的那些」
+    > 假設 bird-feeder 宣告使用 pydantic；seeds 沒宣告使用 pydantic，\
+    > 但如果目前環境剛好也裝了 pydantic (調用過 `uv sync --all-packages`)，\
+    > seeds 仍能 import 成功，這就是「用到了別人宣告的依賴」。\
+    > 所以說，<mark>在運行腳本前，你應該先明確「同步環境」，再去「運行腳本」</mark>。
+  + 若 bird-feeder 要依賴 seeds 這個 memeber
+    + 為 bird-feeder 安裝 seeds
+      ```
+      uv add --package bird-feeder seeds
+      ```
+    + 並在 bird-feeder 的 pyproject.toml 加上
+      ```toml
+      [tool.uv.sources]
+      seeds = { workspace = true }
+      ```
 
 
 
