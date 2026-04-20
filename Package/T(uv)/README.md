@@ -51,7 +51,7 @@
 ## Note
 |📘 <span class="note">NOTE</span> : uv|
 |:---|
-|筆者自 2024/12 入坑 uv，持續記錄 uv 的點點滴滴...<br><span style="color: grey;">上次更新時間：2026/04/11 (版本：0.11.6)</span>|
+|筆者自 2024/12 入坑 uv，持續記錄 uv 的點點滴滴...<br><span style="color: grey;">上次更新時間：2026/04/20 (版本：0.11.7)</span>|
 | uv 安裝套件方式：使用 hardlink (詳見：[cache](#cache：快取))|
 |uv 的 <mark>[build backend](https://hackmd.io/@RogelioKG/setuptools)：`uv-build`</mark> (打包成可發布套件的工具)|
 |uv 的 <mark>lockfile：`uv.lock`</mark> (紀錄每個套件的版本與它們的依賴關係) <br><span style="color: grey;">註：PEP 751 (2024/7/26) 終於正式要求了 Python 的標準 lockfile 為 `pylock.toml`。</span>|
@@ -352,6 +352,9 @@
 ### `tree`：依賴樹
 > 展示套件們的依賴關係
 
++ #### `--outdated`
+  > 尋找是否有最新版的套件
+
 ### `python`：多版本
 + #### `list`
   > 列出可用 Python 版本
@@ -546,7 +549,7 @@
 ## Options
 
 ### `--group` / `--no-group`：optional 依賴套件組 (開發者)
-> 詳見 [dependency-groups](#dependency-groups：optional-依賴套件組-開發者)
+> 詳見 [tool.uv.dependency-groups](#tooluvdependency-groups：依賴套件組-開發者)
 + 開發階段時，將 ruff 安裝到 dev 依賴套件組
     ```
     uv add ruff --group dev
@@ -572,12 +575,21 @@
 |:---|
 |<mark>混用套件源</mark>之所以被定調為 <mark>unsafe</mark>：<br>1. 通常並非 developer 在開發階段預期的情況，可能出現不兼容<br>2. 同名冒充套件的供應鏈攻擊|
 
+### `--upgrade`：更新所有依賴套件
+> 僅更新 venv 與 lockfile
+
+### `--upgrade-package`：更新特定依賴套件
+> 僅更新 venv 與 lockfile
+
+### `--upgrade-group`：更新特定依賴套件組
+> 僅更新 venv 與 lockfile
+
 
 
 ## Project Metadata
 > 詳見 [uv - project metadata](https://docs.astral.sh/uv/reference/settings/#project-metadata)
 
-### `project.optional-dependencies`：optional 依賴套件組 (使用者)
+### `project.optional-dependencies`：依賴套件組 (使用者)
 > PEP 621 規範。\
 > 使用者可決定是否安裝的 optional 依賴：`uv add llm-crawler[proxy]`
 
@@ -600,7 +612,7 @@ proxy = [
 ]
 ```
 
-### `tool.uv.dependency-groups`：optional 依賴套件組 (開發者)
+### `tool.uv.dependency-groups`：依賴套件組 (開發者)
 > uv 擴充。\
 > 開發者可決定是否安裝的 optional 依賴：`uv add --group lint`
 ```toml
@@ -613,8 +625,9 @@ lint = [
 ]
 ```
 
-### `tool.uv.default-groups`：預設安裝 optional 依賴套件組 (開發者)
-> uv 擴充。
+### `tool.uv.default-groups`：預設安裝依賴套件組 (開發者)
+> uv 擴充。\
+> 開發者在 `uv sync` 時會一併安裝的依賴套件組
 ```toml
 [tool.uv]
 default-groups = ["lint"]
