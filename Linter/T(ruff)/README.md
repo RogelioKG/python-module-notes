@@ -37,6 +37,10 @@
     "B",  # flake8-bugbear
     "UP", # pyupgrade
   ]
+  ignore = [
+    "B008", # function-call-in-default-argument
+    "C901", # complex-structure
+  ]
 
   [tool.ruff.format]
   quote-style = "double"
