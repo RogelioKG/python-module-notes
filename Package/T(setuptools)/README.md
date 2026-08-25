@@ -28,82 +28,6 @@
 | :--- |
 | 你也遇到奇怪的安裝錯誤了嗎？<br />看看 [Common Error](#Common-Error) 能不能解決你遇到的問題！ |
 
-| 📘 <span class="note">NOTE</span> |
-| :--- |
-| 你也正在學 JavaScript npm / pnpm 嗎？<br />搭配這篇[⚡ JS 套件管理大師](https://hackmd.io/@RogelioKG/package_management_js) 一起服用，效果更好！ |
-
-|📗 <span class="tip">TIP</span>|
-|:---|
-|使用 `pip install -e .` (editable) 就可以將自己目前開發的套件，<br />暫時安裝到本地 venv，這樣就可以一邊開發一邊測試！<br />(記得開發完要重新再做一次此操作，才能看到改動的結果)|
-
-## Nouns
-
-### egg
-
-  > Python 的一種 <mark>二進制發佈格式 ([binary distribution format][binary-distribution-format])</mark>，現已被 wheel 取代。
-
-### wheel
-
-  > Python 的一種 <mark>二進制發佈格式 ([binary distribution format][binary-distribution-format])</mark>，旨在加速套件的安裝過程。\
-  > 相較於源代碼發佈格式 (如 `.tar.gz`)，wheel <ins>不需在安裝時進行編譯</ins>，因而可以節省安裝時間。\
-  > wheel 檔案的副檔名為 `.whl` (本質上是 `zip` 格式的壓縮檔)，是目前 Python 生態系中推薦的發佈格式。
-
-### PyPI
-
-  > Python 的<mark>第三方套件集中地</mark>。全稱 Python Package Index。
-
-### TestPyPI
-
-  > <mark>PyPI 的測試區</mark>，與 PyPI 是分開的，不用擔心會相互影響。
-
-### build frontend
-
-  > 負責<mark>調用構建過程的工具</mark>，通過與 build backend 交互來實際執行構建任務。\
-  > 前端工具本身不處理具體的構建邏輯，它只是啟動後端的構建。\
-  > 例如 : `build` / `pip` / `tox`。
-
-### build backend
-
-  > 負責<mark>實際執行構建邏輯的工具</mark>，它會處理如何將源代碼轉換成可以安裝和發佈的格式 (`.whl` 和 `.tar.gz`)。\
-  > 例如 : `setuptools` / `flit` / `poetry` / `hatchling` / `meson-python` / `uv-build`。
-
-
-
-## Tools
-
-### `pip`
-  + <mark>package management 工具</mark>
-  + <mark>build frontend 工具</mark>
-  + 用於從 PyPI 上下載、安裝套件
-
-### `build`
-  + <mark>第三方套件</mark>
-  + <mark>build frontend 工具</mark>
-  + 支持從 `pyproject.toml` 配置構建
-
-### `distutils`
-  + <mark>標準庫套件</mark>
-  + 用於構建和發佈 Python 套件
-  + 現已被 setuptools 取代
-
-### `setuptools`
-  + <mark>第三方套件</mark>
-  + <mark>build backend 工具</mark>
-  + 用於構建和發佈 Python 套件
-  + 擴展了標準的 distutils 模組 (打了個 monkey patch)
-  + 提供了更多強大的功能，如支持依賴關係的管理、自動化版本控制和插件系統
-
-### `wheel`
-  + <mark>第三方套件</mark>
-  + 用於產生 Python 套件的二進制發佈格式 ([binary distribution format][binary-distribution-format]) `.whl`
-
-### `twine`
-  + <mark>第三方套件</mark>
-  + 用於發佈 Python 套件
-  + 支持將多個檔案一次性上傳到 PyPI / TestPyPI
-  + 發佈 Python 套件的推薦工具
-
-
 ## Project Directory
 
 ```
@@ -352,79 +276,52 @@ soundcraft/             # top-level package
 | :--- |
 | 當你在套件中包含 `py.typed` 時，這表示該套件的 type hints 可以被靜態類型檢查工具 (mypy) 正確地識別和使用。 |
 | 如果套件沒有包含此檔案，而使用者嘗試進行 mypy 檢查，就會出現以下錯誤：<br>`error: Skipping analyzing "...": module is installed, but missing library stubs or py.typed marker  [import-untyped]` |
-| 然後記得 == 要先在 virtual environment 下載 mypy (是誰那麼蠢會忘記，是的就是我！) |
 
 
 ```toml
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta" # 使用 setuptools 作為 build backend
-
-[tool.setuptools.packages.find]
-include = ["pdfize*"]
-exclude = ["pdfize.data*", "tests*"] # 注意不是 ["pdfize.data.*", "tests.*"]
-
-[tool.setuptools.package-data]
-pdfize = ["py.typed"] # 新版 setuptools 會自動包含 py.typed 或 .pyi
-
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "pdfize"
-version = "1.0.6"
-description = "a simple tools for converting pdf to image."
-authors = [{ name = "RogelioKG", email = "...@gmail.com" }]
-license = { text = "MIT" }
-requires-python = ">=3.11"
-dependencies = [
-    "altgraph>=0.17.4",
-    "click>=8.1.7",
-    "colorama>=0.4.6",
-    "pillow>=10.3.0",
-    "PyMuPDF>=1.24.9",
-    "PyMuPDFb>=1.24.9",
-    "pywin32-ctypes>=0.2.2",
-    "tqdm>=4.66.4",
+name = "mathkit"
+version = "0.1.0"
+description = "..."
+readme = "README.md"
+authors = [
+    { name = "RogelioKG", email = "rogeliokg0813@gmail.com" }
 ]
-readme = { file = "README.md", content-type = "text/markdown" }
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3.11",
-    "Operating System :: OS Independent",
+requires-python = ">=3.13"
+dependencies = []
+
+# src-layout：套件都在 src/ 底下，自動探索
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# 型別檔不是 .py，要明講才會被打包進 wheel ("*" = 所有子套件)
+[tool.setuptools.package-data]
+"*" = ["py.typed", "*.pyi"]
+
+# .c 只需進 sdist，wheel 裡放編譯好的 .pyd/.so 就夠了
+[tool.setuptools.exclude-package-data]
+"*" = ["*.c"]
+
+# 改到 .c 時讓 uv 失效快取、重新編譯 (否則 editable install 會沿用舊的 .pyd)
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "setup.py" },
+    { file = "src/**/*.c" },
 ]
-
-[project.urls]
-Repository = "https://github.com/RogelioKG/PDFize"
-Changelog = "https://github.com/RogelioKG/PDFize/blob/main/CHANGELOG.md"
-
-[project.optional-dependencies]
-dev = ["build>=1.2.1", "twine>=5.1.1"]
-
 ```
 
 ### `setup.cfg`
 ...
 
 ### `MANIFEST.in`
-
-包含非 Python 相關目錄或檔案
-
-| Command | Description |
-|---------|-------------|
-| `include pat1 pat2 ...`                       | Add all files matching any of the listed patterns<br>(Files must be given as paths relative to the root of the project)    |
-| `exclude pat1 pat2 ...`                       | Remove all files matching any of the listed patterns<br>(Files must be given as paths relative to the root of the project) |
-| `recursive-include dir-pattern pat1 pat2 ...` | Add all files under directories matching dir-pattern that match any of the listed patterns                                 |
-| `recursive-exclude dir-pattern pat1 pat2 ...` | Remove all files under directories matching dir-pattern that match any of the listed patterns |
-| `global-include pat1 pat2 ...`                | Add all files anywhere in the source tree matching any of the listed patterns |
-| `global-exclude pat1 pat2 ...`                | Remove all files anywhere in the source tree matching any of the listed patterns |
-| `graft dir-pattern`                           | Add all files under directories matching dir-pattern |
-| `prune dir-pattern`                           | Remove all files under directories matching dir-pattern |
+...
 
 ## Build
-
-### 🚨 caution
-+ **🚨 <span class="caution">CAUTION</span> : <u>快取行為</u>**
-  + 重新將套件構建為 distribution 時，構建工具可能會有一些[快取行為][caching-and-troubleshooting]。如果發現構建結果有問題，先刪除 `dist/` 和 `build/` 和 `*.egg-info/` 目錄，再重新構建一次。
-
 
 ### `setuptools`
 
@@ -441,13 +338,13 @@ dev = ["build>=1.2.1", "twine>=5.1.1"]
     py setup.py sdist
     ```
 
-  + 將套件構建為 binary distribution (egg 格式)
+  + 將套件構建為 built distribution (egg 格式)
     
     ```bash
     py setup.py bdist_egg
     ```
 
-  + 將套件構建為 binary distribution (wheel 格式)
+  + 將套件構建為 built distribution (wheel 格式)
     
     > 產生 build/ 和 dist/ 和 *.egg-info/
     ```bash
