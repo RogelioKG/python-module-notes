@@ -88,8 +88,6 @@
 詳見 [UV CLI](https://docs.astral.sh/uv/reference/cli/#uv)。
 
 ### `init`：創建專案
-+ #### `--python`
-  > 指定 Python 版本
 + #### `--script`
   > 用於構建一個簡單<mark>腳本</mark>
   + 腳本的所有依賴直接寫在 dependencies
@@ -144,47 +142,8 @@
     if __name__ == "__main__":
         generate_banner("UV POWERED")
     ```
-+ #### `--app`
-  > 用於構建一個<mark>應用程式</mark>，通常不作為套件發布
-  + 目錄架構
-    ```
-    project_app/
-    ├── .gitignore
-    ├── .python-version
-    ├── main.py
-    ├── pyproject.toml
-    └── README.md
-    ```
-+ #### `--lib`
-  > 用於構建一個<mark>函式庫</mark>，可作為套件發布
-  + 目錄架構
-    ```
-    project_lib/
-    ├── .gitignore
-    ├── .python-version
-    ├── pyproject.toml
-    ├── README.md
-    └── src/
-        └── project_lib/
-            ├── py.typed
-            └── __init__.py
-    ```
-  + `pyproject.toml` (build 相關資訊儲存於此)
-    ```toml
-    [project]
-    ...
-
-    [build-system]
-    requires = ["uv_build>=0.9.3,<0.10.0"]
-    build-backend = "uv_build"
-    ```
-  + `uv sync` 測試安裝
-    + 在專案內「安裝」你寫的這個套件，你可以一邊開發、一邊測試功能 (如同 `pip install -e .`)
-    + 原理：把 `src/` 目錄加入 `sys.path`
-  + user 實際安裝
-    + 只有 `src/` 目錄中的內容，會被放入 `.venv/Lib/site-packages/` 目錄
 + #### `--package`
-  > 用於構建一些 <mark>CLI 工具</mark>，可作為套件發布
+  > 用於構建一個<mark>應用程式</mark>
   + 目錄架構
     ```
     project_package/
@@ -198,27 +157,57 @@
     ```
   + `pyproject.toml` (build 相關資訊儲存於此)
     ```toml
+    [project]
+    name = "project-package"
+    # ...
+
     [project.scripts]
-    rogeliokg-core = "rogeliokg_core:main" 
-    # 執行檔名稱 rogeliokg-core
-    # 入口函式 src/rogeliokg_core/__init__.py:main
+    project-package = "project_package:main"
+    # 入口模組 src/project_package/__init__.py、入口函式 main
 
     [build-system]
-    requires = ["uv_build>=0.9.3,<0.10.0"]
+    requires = ["uv_build>=0.12.5,<0.13.0"]
     build-backend = "uv_build"
     ```
-  + `uv sync` 測試安裝
+  + `uv sync` 會做 editable install
     + 在專案內「安裝」你寫的這個套件，你可以一邊開發、一邊測試功能 (如同 `pip install -e .`)
     + 原理：把 `src/` 目錄加入 `sys.path`
   + user 實際安裝
     + 只有 `src/` 目錄中的內容，會被放入 `.venv/Lib/site-packages/` 目錄
     + <mark>會在 `.venv/Scripts/` 生成執行檔，供 user 調用</mark> (註：需先進入 venv)
++ #### `--lib`
+  > 用於構建一個<mark>函式庫</mark>
+  + 目錄架構
+    ```
+    project_lib/
+    ├── .gitignore
+    ├── .python-version
+    ├── pyproject.toml
+    ├── README.md
+    └── src/
+        └── project_lib/
+            ├── py.typed
+            └── __init__.py
+    ```
+  + `pyproject.toml`
+    ```toml
+    [project]
+    # ...
+
+    [build-system]
+    requires = ["uv_build>=0.12.5,<0.13.0"]
+    build-backend = "uv_build"
+    ```
+  + `uv sync` 會做 editable install
+    + 在專案內「安裝」你寫的這個套件，你可以一邊開發、一邊測試功能 (如同 `pip install -e .`)
+    + 原理：把 `src/` 目錄加入 `sys.path`
+  + user 實際安裝
+    + 只有 `src/` 目錄中的內容，會被放入 `.venv/Lib/site-packages/` 目錄
++ #### `--python`
+  > 指定 Python 版本
 + #### `--build-backend`
-  > 指定打包用 backend\
-  > (若專案是可發布套件才會用的到)
-  + 可自己指定第三方 build backend
-    > 比如：`hatch` (hatchling)、`setuptools` (setuptools)。\
-    > 預設是 `uv-build`。
+  > 指定打包用的 build backend\
+  > (可自己指定第三方 build backend，比如：`hatch`、`setuptools`，預設是 `uv-build`)
 
 ### `sync`：同步套件
 > <mark>安裝全部套件的加強版</mark>。\
@@ -226,7 +215,7 @@
 > 1. 自動建立 venv
 > 2. 自動建立 lockfile
 > 3. 自動安裝依賴套件
-> 4. 自動安裝專案 in editable mode (若專案將作為套件發布)
+> 4. 自動對專案進行 editable install (若有指定 build backend)
 
 ### `add` ：安裝套件
 |📗 <span class="tip">TIP</span>|
@@ -314,9 +303,14 @@
 |:---|
 |當 <mark>`pyproject.toml` 和 `uv.lock` 不一致</mark> 時，<mark>進行同步</mark> (以 `pyproject.toml` 為準)。|
 + #### ` `
-  > 一般執行
+  > 執行腳本
   ```
   uv run main.py
+  ```
+  > 執行位於 `.venv/Scripts` 內的工具\
+  > (打包好的 CLI 工具。可以是專案自身、也可以是藉由 `uv add` 安裝而來的)
+  ```
+  uv run ruff
   ```
 + #### `--with`
   > 暫時將某版本的套件加入環境並執行。
