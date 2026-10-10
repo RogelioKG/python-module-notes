@@ -442,11 +442,13 @@
   ```
   uv tool run ruff check
   ```
++ #### `install` / `uninstall`
+  > 安裝 / 移除
+
   |📘 <span class="note">NOTE</span>|
   |:---|
   |CLI 執行檔會被放在 `~/.local/bin` (全域可見)|
-+ #### `install` / `uninstall`
-  > 安裝 / 移除
+
   + 一般安裝
     ```
     uv tool install ruff
@@ -458,7 +460,7 @@
     ```
 + #### `dir` 
   > 工具被安裝在哪個目錄\
-  > (通常是 `%AppData%/Roaming/uv/tools`)
+  > (通常是 `%AppData%/uv/tools`)
   ```
   uv tool dir
   ```
@@ -468,7 +470,7 @@
 
 ### `publish`：發布套件
 1. 發布到不同套件源 (比如 testpypi)
-    > 下指令時要指定套件源 `--index testpypi` (要先在 [`pyproject.toml` 設定](#--index：指定套件源)
+    > 下指令時要指定套件源 `--index testpypi` (要先在 [`pyproject.toml` 設定](#tooluvindex：額外套件源)
 2. 會問你 username 和 password (但現在不是改用 API token 登入？)
     > 因此 username 要輸入 `__token__`，password 再輸入 API token 即可
 
@@ -512,7 +514,7 @@
 
 |☢️ <span class="warn">WARNING</span>|
 |:---|
-|使用 `uv pip` 操作，並不會同步更新到 `pyproject.toml` 和 `uvlock.toml`。<br>這意味著，你無法享受到 uv 的所有 feature。<br>若是新專案，建議直接使用 uv 的原生指令。|
+|使用 `uv pip` 操作，並不會同步更新到 `pyproject.toml` 和 `uv.lock`。<br>這意味著，你無法享受到 uv 的所有 feature。<br>若是新專案，建議直接使用 uv 的原生指令。|
 
 ### `venv`：創建虛擬環境
 > 預設目錄名 `.venv`
@@ -607,7 +609,7 @@ proxy = [
 ```
 
 ### `tool.uv.dependency-groups`：依賴套件組 (開發者)
-> uv 擴充。\
+> PEP 735 規範。\
 > 開發者可決定是否安裝的 optional 依賴：`uv add --group lint`
 ```toml
 [dependency-groups]
