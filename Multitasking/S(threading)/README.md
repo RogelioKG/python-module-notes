@@ -125,7 +125,7 @@
     > 獲取鎖和釋放鎖的邏輯都交給 `Condition`，`Semaphore` 單純就是套一層可使用資源數量 `value` 的皮罷了
     ```py
     class Semaphore:
-      def __init__(self, value=1):
+        def __init__(self, value=1):
           if value < 0:
               raise ValueError("semaphore initial value must be >= 0")
           self._cond = Condition(Lock())
@@ -161,22 +161,22 @@
     ```py
     class Timer(Thread):
 
-    def __init__(self, interval, function, args=None, kwargs=None):
-        Thread.__init__(self)
-        self.interval = interval
-        self.function = function
-        self.args = args if args is not None else []
-        self.kwargs = kwargs if kwargs is not None else {}
-        self.finished = Event()
+        def __init__(self, interval, function, args=None, kwargs=None):
+            Thread.__init__(self)
+            self.interval = interval
+            self.function = function
+            self.args = args if args is not None else []
+            self.kwargs = kwargs if kwargs is not None else {}
+            self.finished = Event()
 
-    def cancel(self):
-        self.finished.set()
+        def cancel(self):
+            self.finished.set()
 
-    def run(self):
-        self.finished.wait(self.interval)
-        if not self.finished.is_set():
-            self.function(*self.args, **self.kwargs)
-        self.finished.set()
+        def run(self):
+            self.finished.wait(self.interval)
+            if not self.finished.is_set():
+                self.function(*self.args, **self.kwargs)
+            self.finished.set()
     ```
 
     | method       | description                                                       |
