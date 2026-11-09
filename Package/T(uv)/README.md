@@ -358,23 +358,25 @@
 + #### `install` / `uninstall`
   > 安裝 / 移除
   ```
-  uv python install 3.12.0
+  uv python install 3.13
   ```
-  |📘 <span class="note">NOTE</span>|
-  |:---|
-  |Python 直譯器會被放在 `~/.local/bin` (全域可見)|
-  |<mark>在全域可使用 `python3.xx` 把 REPL 互動式環境叫出來</mark>|
+  + `--default`
+    > 之後任何程式從 PATH 找 python 或 python3，都會找到 3.13
+    ```
+    uv python install 3.13 --default
+    ```
+
 + #### `pin`
   > 切換 Python 版本 (更改 `.python-version`)
   + ` `
     > 專案內的 Python 版本
     ```
-    uv python pin 3.11
+    uv python pin 3.13
     ```
   + `--global`
     > 之後 init 專案的 Python 版本
     ```
-    uv python pin 3.11 --global
+    uv python pin 3.13 --global
     ```
 
 ### `export`：將 lockfile 導出為其他格式
